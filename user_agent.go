@@ -8,7 +8,10 @@
 // information that has been extracted from a parsed User Agent string.
 package user_agent
 
-import "strings"
+import (
+	"encoding/json"
+	"strings"
+)
 
 // A section contains the name of the product, its version and
 // an optional comment.
@@ -21,15 +24,15 @@ type section struct {
 // The UserAgent struct contains all the info that can be extracted
 // from the User-Agent string.
 type UserAgent struct {
-	ua           string
-	mozilla      string
-	platform     string
-	os           string
-	localization string
-	browser      Browser
-	bot          bool
-	mobile       bool
-	undecided    bool
+	ua           string  `json:"-"`
+	Mozilla      string  `json:"mozilla"`
+	Platform     string  `json:"platform"`
+	Os           string  `json:"os"`
+	Localization string  `json:"localization"`
+	Browser      Browser `json:"browser"`
+	Bot          bool    `json:"is_bot"`
+	Mobile       bool    `json:"is_mobile"`
+	Undecided    bool    `json:"-"`
 }
 
 // Read from the given string until the given delimiter or the
@@ -100,17 +103,17 @@ func parseSection(ua string, index *int) (s section) {
 // Initialize the parser.
 func (p *UserAgent) initialize() {
 	p.ua = ""
-	p.mozilla = ""
-	p.platform = ""
-	p.os = ""
-	p.localization = ""
-	p.browser.Engine = ""
-	p.browser.EngineVersion = ""
-	p.browser.Name = ""
-	p.browser.Version = ""
-	p.bot = false
-	p.mobile = false
-	p.undecided = false
+	p.Mozilla = ""
+	p.Platform = ""
+	p.Os = ""
+	p.Localization = ""
+	p.Browser.Engine = ""
+	p.Browser.EngineVersion = ""
+	p.Browser.Name = ""
+	p.Browser.Version = ""
+	p.Bot = false
+	p.Mobile = false
+	p.Undecided = false
 }
 
 // Parse the given User-Agent string and get the resulting UserAgent object.
@@ -132,43 +135,29 @@ func (p *UserAgent) Parse(ua string) {
 	p.ua = ua
 	for index, limit := 0, len(ua); index < limit; {
 		s := parseSection(ua, &index)
-		if !p.mobile && s.name == "Mobile" {
-			p.mobile = true
+		if !p.Mobile && s.name == "Mobile" {
+			p.Mobile = true
 		}
 		sections = append(sections, s)
 	}
 
 	if len(sections) > 0 {
 		if sections[0].name == "Mozilla" {
-			p.mozilla = sections[0].version
+			p.Mozilla = sections[0].version
 		}
 
 		p.detectBrowser(sections)
 		p.detectOS(sections[0])
 
-		if p.undecided {
+		if p.Undecided {
 			p.checkBot(sections)
 		}
 	}
 }
 
-// Returns the mozilla version (it's how the User Agent string begins:
-// "Mozilla/5.0 ...", unless we're dealing with Opera, of course).
-func (p *UserAgent) Mozilla() string {
-	return p.mozilla
-}
-
-// Returns true if it's a bot, false otherwise.
-func (p *UserAgent) Bot() bool {
-	return p.bot
-}
-
-// Returns true if it's a mobile device, false otherwise.
-func (p *UserAgent) Mobile() bool {
-	return p.mobile
-}
-
-// Returns the original given user agent.
-func (p *UserAgent) UA() string {
-	return p.ua
+func (ua *UserAgent) Map() map[string]interface{} {
+	jsonString, _ := json.Marshal(ua)
+	var uaMap map[string]interface{}
+	json.Unmarshal(jsonString, &uaMap)
+	return uaMap
 }
