@@ -58,58 +58,58 @@ func normalizeOS(name string) string {
 // The first argument p is a reference to the current UserAgent and the second
 // argument is a slice of strings containing the comment.
 func webkit(p *UserAgent, comment []string) {
-	if p.platform == "webOS" {
-		p.browser.Name = p.platform
-		p.os = "Palm"
+	if p.Platform == "webOS" {
+		p.Browser.Name = p.Platform
+		p.Os = "Palm"
 		if len(comment) > 2 {
-			p.localization = comment[2]
+			p.Localization = comment[2]
 		}
-		p.mobile = true
-	} else if p.platform == "Symbian" {
-		p.mobile = true
-		p.browser.Name = p.platform
-		p.os = comment[0]
-	} else if p.platform == "Linux" {
-		p.mobile = true
-		if p.browser.Name == "Safari" {
-			p.browser.Name = "Android"
+		p.Mobile = true
+	} else if p.Platform == "Symbian" {
+		p.Mobile = true
+		p.Browser.Name = p.Platform
+		p.Os = comment[0]
+	} else if p.Platform == "Linux" {
+		p.Mobile = true
+		if p.Browser.Name == "Safari" {
+			p.Browser.Name = "Android"
 		}
 		if len(comment) > 1 {
 			if comment[1] == "U" {
 				if len(comment) > 2 {
-					p.os = comment[2]
+					p.Os = comment[2]
 				} else {
-					p.mobile = false
-					p.os = comment[0]
+					p.Mobile = false
+					p.Os = comment[0]
 				}
 			} else {
-				p.os = comment[1]
+				p.Os = comment[1]
 			}
 		}
 		if len(comment) > 3 {
-			p.localization = comment[3]
+			p.Localization = comment[3]
 		} else if len(comment) == 3 {
 			_ = p.googleBot()
 		}
 	} else if len(comment) > 0 {
 		if len(comment) > 3 {
-			p.localization = comment[3]
+			p.Localization = comment[3]
 		}
 		if strings.HasPrefix(comment[0], "Windows NT") {
-			p.os = normalizeOS(comment[0])
+			p.Os = normalizeOS(comment[0])
 		} else if len(comment) < 2 {
-			p.localization = comment[0]
+			p.Localization = comment[0]
 		} else if len(comment) < 3 {
 			if !p.googleBot() {
-				p.os = normalizeOS(comment[1])
+				p.Os = normalizeOS(comment[1])
 			}
 		} else {
-			p.os = normalizeOS(comment[2])
+			p.Os = normalizeOS(comment[2])
 		}
-		if p.platform == "BlackBerry" {
-			p.browser.Name = p.platform
-			if p.os == "Touch" {
-				p.os = p.platform
+		if p.Platform == "BlackBerry" {
+			p.Browser.Name = p.Platform
+			if p.Os == "Touch" {
+				p.Os = p.Platform
 			}
 		}
 	}
@@ -124,27 +124,27 @@ func gecko(p *UserAgent, comment []string) {
 	if len(comment) > 1 {
 		if comment[1] == "U" {
 			if len(comment) > 2 {
-				p.os = normalizeOS(comment[2])
+				p.Os = normalizeOS(comment[2])
 			} else {
-				p.os = normalizeOS(comment[1])
+				p.Os = normalizeOS(comment[1])
 			}
 		} else {
-			if p.platform == "Android" {
-				p.mobile = true
-				p.platform, p.os = normalizeOS(comment[1]), p.platform
+			if p.Platform == "Android" {
+				p.Mobile = true
+				p.Platform, p.Os = normalizeOS(comment[1]), p.Platform
 			} else if comment[0] == "Mobile" || comment[0] == "Tablet" {
-				p.mobile = true
-				p.os = "FirefoxOS"
+				p.Mobile = true
+				p.Os = "FirefoxOS"
 			} else {
-				if p.os == "" {
-					p.os = normalizeOS(comment[1])
+				if p.Os == "" {
+					p.Os = normalizeOS(comment[1])
 				}
 			}
 		}
 		// Only parse 4th comment as localization if it doesn't start with rv:.
 		// For example Firefox on Ubuntu contains "rv:XX.X" in this field.
 		if len(comment) > 3 && !strings.HasPrefix(comment[3], "rv:") {
-			p.localization = comment[3]
+			p.Localization = comment[3]
 		}
 	}
 }
@@ -156,21 +156,21 @@ func gecko(p *UserAgent, comment []string) {
 // argument is a slice of strings containing the comment.
 func trident(p *UserAgent, comment []string) {
 	// Internet Explorer only runs on Windows.
-	p.platform = "Windows"
+	p.Platform = "Windows"
 
 	// The OS can be set before to handle a new case in IE11.
-	if p.os == "" {
+	if p.Os == "" {
 		if len(comment) > 2 {
-			p.os = normalizeOS(comment[2])
+			p.Os = normalizeOS(comment[2])
 		} else {
-			p.os = "Windows NT 4.0"
+			p.Os = "Windows NT 4.0"
 		}
 	}
 
 	// Last but not least, let's detect if it comes from a mobile device.
 	for _, v := range comment {
 		if strings.HasPrefix(v, "IEMobile") {
-			p.mobile = true
+			p.Mobile = true
 			return
 		}
 	}
@@ -185,27 +185,27 @@ func opera(p *UserAgent, comment []string) {
 	slen := len(comment)
 
 	if strings.HasPrefix(comment[0], "Windows") {
-		p.platform = "Windows"
-		p.os = normalizeOS(comment[0])
+		p.Platform = "Windows"
+		p.Os = normalizeOS(comment[0])
 		if slen > 2 {
 			if slen > 3 && strings.HasPrefix(comment[2], "MRA") {
-				p.localization = comment[3]
+				p.Localization = comment[3]
 			} else {
-				p.localization = comment[2]
+				p.Localization = comment[2]
 			}
 		}
 	} else {
 		if strings.HasPrefix(comment[0], "Android") {
-			p.mobile = true
+			p.Mobile = true
 		}
-		p.platform = comment[0]
+		p.Platform = comment[0]
 		if slen > 1 {
-			p.os = comment[1]
+			p.Os = comment[1]
 			if slen > 3 {
-				p.localization = comment[3]
+				p.Localization = comment[3]
 			}
 		} else {
-			p.os = comment[0]
+			p.Os = comment[0]
 		}
 	}
 }
@@ -219,11 +219,11 @@ func dalvik(p *UserAgent, comment []string) {
 	slen := len(comment)
 
 	if strings.HasPrefix(comment[0], "Linux") {
-		p.platform = comment[0]
+		p.Platform = comment[0]
 		if slen > 2 {
-			p.os = comment[2]
+			p.Os = comment[2]
 		}
-		p.mobile = true
+		p.Mobile = true
 	}
 }
 
@@ -252,15 +252,15 @@ func (p *UserAgent) detectOS(s section) {
 	if s.name == "Mozilla" {
 		// Get the platform here. Be aware that IE11 provides a new format
 		// that is not backwards-compatible with previous versions of IE.
-		p.platform = getPlatform(s.comment)
-		if p.platform == "Windows" && len(s.comment) > 0 {
-			p.os = normalizeOS(s.comment[0])
+		p.Platform = getPlatform(s.comment)
+		if p.Platform == "Windows" && len(s.comment) > 0 {
+			p.Os = normalizeOS(s.comment[0])
 		}
 
 		// And finally get the OS depending on the engine.
-		switch p.browser.Engine {
+		switch p.Browser.Engine {
 		case "":
-			p.undecided = true
+			p.Undecided = true
 		case "Gecko":
 			gecko(p, s.comment)
 		case "AppleWebKit":
@@ -278,23 +278,8 @@ func (p *UserAgent) detectOS(s section) {
 		}
 	} else {
 		// Check whether this is a bot or just a weird browser.
-		p.undecided = true
+		p.Undecided = true
 	}
-}
-
-// Returns a string containing the platform..
-func (p *UserAgent) Platform() string {
-	return p.platform
-}
-
-// Returns a string containing the name of the Operating System.
-func (p *UserAgent) OS() string {
-	return p.os
-}
-
-// Returns a string containing the localization.
-func (p *UserAgent) Localization() string {
-	return p.localization
 }
 
 // Return OS name and version from a slice of strings created from the full name of the OS.
@@ -328,7 +313,7 @@ func osName(osSplit []string) (name, version string) {
 // Returns combined information for the operating system.
 func (p *UserAgent) OSInfo() OSInfo {
 	// Special case for iPhone weirdness
-	os := strings.Replace(p.os, "like Mac OS X", "", 1)
+	os := strings.Replace(p.Os, "like Mac OS X", "", 1)
 	os = strings.Replace(os, "CPU", "", 1)
 	os = strings.Trim(os, " ")
 
@@ -352,7 +337,7 @@ func (p *UserAgent) OSInfo() OSInfo {
 	version = strings.Replace(version, "_", ".", -1)
 
 	return OSInfo{
-		FullName: p.os,
+		FullName: p.Os,
 		Name:     name,
 		Version:  version,
 	}

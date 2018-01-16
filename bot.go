@@ -45,33 +45,33 @@ func getFromSite(comment []string) string {
 func (p *UserAgent) googleBot() bool {
 	// This is a hackish way to detect Google's mobile bot.
 	if strings.Index(p.ua, "Googlebot") != -1 {
-		p.platform = ""
-		p.undecided = true
+		p.Platform = ""
+		p.Undecided = true
 	}
-	return p.undecided
+	return p.Undecided
 }
 
 // Set the attributes of the receiver as given by the parameters. All the other
 // parameters are set to empty.
 func (p *UserAgent) setSimple(name, version string, bot bool) {
-	p.bot = bot
+	p.Bot = bot
 	if !bot {
-		p.mozilla = ""
+		p.Mozilla = ""
 	}
-	p.browser.Name = name
-	p.browser.Version = version
-	p.browser.Engine = ""
-	p.browser.EngineVersion = ""
-	p.os = ""
-	p.localization = ""
+	p.Browser.Name = name
+	p.Browser.Version = version
+	p.Browser.Engine = ""
+	p.Browser.EngineVersion = ""
+	p.Os = ""
+	p.Localization = ""
 }
 
 // Fix some values for some weird browsers.
 func (p *UserAgent) fixOther(sections []section) {
 	if len(sections) > 0 {
-		p.browser.Name = sections[0].name
-		p.browser.Version = sections[0].version
-		p.mozilla = ""
+		p.Browser.Name = sections[0].name
+		p.Browser.Version = sections[0].version
+		p.Mozilla = ""
 	}
 }
 
@@ -83,7 +83,7 @@ func (p *UserAgent) checkBot(sections []section) {
 	// If there's only one element, and it's doesn't have the Mozilla string,
 	// check whether this is a bot or not.
 	if len(sections) == 1 && sections[0].name != "Mozilla" {
-		p.mozilla = ""
+		p.Mozilla = ""
 
 		// Check whether the name has some suspicious "bot" or "crawler" in his name.
 		if botRegex.Match([]byte(sections[0].name)) {

@@ -528,19 +528,19 @@ var uastrings = []struct {
 //
 // Returns a string that contains the beautified representation.
 func beautify(ua *UserAgent) (s string) {
-	if len(ua.Mozilla()) > 0 {
-		s += "Mozilla:" + ua.Mozilla() + " "
+	if len(ua.Mozilla) > 0 {
+		s += "Mozilla:" + ua.Mozilla + " "
 	}
-	if len(ua.Platform()) > 0 {
-		s += "Platform:" + ua.Platform() + " "
+	if len(ua.Platform) > 0 {
+		s += "Platform:" + ua.Platform + " "
 	}
-	if len(ua.OS()) > 0 {
-		s += "OS:" + ua.OS() + " "
+	if len(ua.Os) > 0 {
+		s += "OS:" + ua.Os + " "
 	}
-	if len(ua.Localization()) > 0 {
-		s += "Localization:" + ua.Localization() + " "
+	if len(ua.Localization) > 0 {
+		s += "Localization:" + ua.Localization + " "
 	}
-	str1, str2 := ua.Browser()
+	str1, str2 := ua.Browser.Name, ua.Browser.Version
 	if len(str1) > 0 {
 		s += "Browser:" + str1
 		if len(str2) > 0 {
@@ -549,7 +549,7 @@ func beautify(ua *UserAgent) (s string) {
 			s += " "
 		}
 	}
-	str1, str2 = ua.Engine()
+	str1, str2 = ua.Browser.Engine, ua.Browser.EngineVersion
 	if len(str1) > 0 {
 		s += "Engine:" + str1
 		if len(str2) > 0 {
@@ -558,8 +558,8 @@ func beautify(ua *UserAgent) (s string) {
 			s += " "
 		}
 	}
-	s += "Bot:" + fmt.Sprintf("%v", ua.Bot()) + " "
-	s += "Mobile:" + fmt.Sprintf("%v", ua.Mobile())
+	s += "Bot:" + fmt.Sprintf("%v", ua.Bot) + " "
+	s += "Mobile:" + fmt.Sprintf("%v", ua.Mobile)
 	return s
 }
 
